@@ -22,7 +22,7 @@
     "typeorm": "0.2.32"
   },
   "scripts": {
-    "env:gen": "gen-env-types .env -o src/types/env.d.ts -e .",
+    "env:gen": "gen-env-types .env.development -o src/types/env.d.ts -e .",
     "start": "node dist/index.js",
     "watch": "tsc -w",
     "dev": "nodemon dis/index.js"
