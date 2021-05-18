@@ -10,7 +10,9 @@
   },
   "dependencies": {
     "apollo-server-express": "^2.24.0",
+    "argon2": "^0.27.2",
     "class-validator": "^0.13.1",
+    "cors": "^2.8.5",
     "dotenv": "^9.0.2",
     "express": "^4.17.1",
     "graphql": "^15.5.0",
