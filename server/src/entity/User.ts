@@ -26,6 +26,9 @@ export class User extends BaseEntity {
   @Column('text')
   password: string;
 
+  @Column('int', { default: 0 })
+  count: number;
+
   @Field(() => Date)
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

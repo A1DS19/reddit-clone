@@ -19,18 +19,23 @@ const typeorm_1 = require("typeorm");
 const Auth_1 = require("./resolvers/auth/Auth");
 const cors_1 = __importDefault(require("cors"));
 const express_1 = __importDefault(require("express"));
+const cookie_parser_1 = __importDefault(require("cookie-parser"));
+const manageTokens_1 = require("./middleware/manageTokens");
 (() => __awaiter(this, void 0, void 0, function* () {
     yield typeorm_1.createConnection();
     const app = express_1.default();
     const PORT = process.env.PORT || 4000;
     const env = process.env.NODE_ENV || 'development';
+    app.use(cookie_parser_1.default());
     app.use(cors_1.default({
         origin: env === 'development' ? 'http://localhost:3000' : '',
     }));
+    app.use((req, res, next) => __awaiter(this, void 0, void 0, function* () { return yield manageTokens_1.manageTokens(req, res, next); }));
     const server = new apollo_server_express_1.ApolloServer({
         schema: yield type_graphql_1.buildSchema({
             resolvers: [Auth_1.Auth],
         }),
+        formatError: (error) => error,
         context: ({ req, res }) => ({ req, res }),
     });
     server.applyMiddleware({ app, cors: false });

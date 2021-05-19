@@ -26,9 +26,3 @@ export class LoginInput {
   @Length(0, 255, { message: 'Debe agregar una contraseña' })
   password: string;
 }
-
-ObjectType();
-export class AuthResponse {
-  @Field(() => String)
-  token: string;
-}

@@ -1,18 +1,39 @@
 import { User } from '../../entity/User';
-import { Arg, Mutation, Query, Resolver } from 'type-graphql';
+import { Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql';
 import * as argon2 from 'argon2';
 import { LoginInput, RegisterInput } from './types';
-import { ValidationError } from 'apollo-server-express';
+import { AuthenticationError, ValidationError } from 'apollo-server-express';
+import { MyContext } from 'src/types/MyContext';
+import { createTokens } from '../../util/token';
 
 @Resolver(User)
 export class Auth {
-  @Query(() => String)
-  test() {
-    return 'loca';
+  @Query(() => User, { nullable: true })
+  async me(@Ctx() { req }: MyContext): Promise<User> {
+    try {
+      const userId = (req as any).userId;
+
+      if (!userId) {
+        throw new AuthenticationError('Debe iniciar sesión');
+      }
+
+      const user = await User.findOne({ id: userId });
+
+      if (!user) {
+        throw new AuthenticationError('Usuario no existe');
+      }
+
+      return user;
+    } catch (err) {
+      throw new AuthenticationError(err.message);
+    }
   }
 
   @Mutation(() => User)
-  async register(@Arg('input') input: RegisterInput): Promise<User> {
+  async register(
+    @Arg('input') input: RegisterInput,
+    @Ctx() ctx: MyContext
+  ): Promise<User> {
     try {
       const email = await User.findOne({ email: input.email });
 
@@ -28,18 +49,25 @@ export class Auth {
 
       const hashedPassword = await argon2.hash(input.password);
 
-      return await User.create({
+      const user = await User.create({
         email: input.email,
         username: input.username,
         password: hashedPassword,
       }).save();
+
+      const { refreshToken, accessToken } = createTokens(user);
+
+      ctx.res.cookie('refresh-token', refreshToken);
+      ctx.res.cookie('access-token', accessToken);
+
+      return user;
     } catch (error) {
       throw new ValidationError(error.message);
     }
   }
 
   @Mutation(() => User)
-  async login(@Arg('input') input: LoginInput): Promise<User> {
+  async login(@Arg('input') input: LoginInput, @Ctx() ctx: MyContext): Promise<User> {
     try {
       const user = await User.findOne({ email: input.email });
 
@@ -53,9 +81,34 @@ export class Auth {
         throw new ValidationError('Datos invalidos');
       }
 
+      const { refreshToken, accessToken } = createTokens(user);
+
+      ctx.res.cookie('refresh-token', refreshToken);
+      ctx.res.cookie('access-token', accessToken);
+
       return user;
     } catch (error) {
       throw new ValidationError(error.message);
     }
+  }
+
+  @Mutation(() => Boolean)
+  async invalidateTokens(@Ctx() { req }: MyContext): Promise<boolean> {
+    const userId = (req as any).userId;
+    if (!userId) {
+      return false;
+    }
+
+    const user = await User.findOne({ id: userId });
+
+    if (!user) {
+      return false;
+    }
+
+    user.count += 1;
+
+    await user.save();
+
+    return true;
   }
 }
