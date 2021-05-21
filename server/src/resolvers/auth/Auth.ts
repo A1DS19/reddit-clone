@@ -1,10 +1,13 @@
 import { User } from '../../entity/User';
 import { Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql';
 import * as argon2 from 'argon2';
-import { LoginInput, RegisterInput } from './types';
+import { LoginInput, RegisterInput, ResetPasswordInput } from './types';
 import { AuthenticationError, ValidationError } from 'apollo-server-express';
 import { MyContext } from 'src/types/MyContext';
 import { createTokens } from '../../util/token';
+import { sendEmail } from '../../util/sendEmail';
+import { v4 as uuidv4 } from 'uuid';
+import { LessThanOrEqual } from 'typeorm';
 
 @Resolver(User)
 export class Auth {
@@ -109,6 +112,71 @@ export class Auth {
 
     await user.save();
 
+    //Se pueden limpiar los cookies pero ya con el count diferente
+    //queda invalidado
+    // res.clearCookie('access-token');
+    // res.clearCookie('refresh-token');
+
     return true;
+  }
+
+  @Mutation(() => Boolean)
+  async requestReset(@Arg('email') email: string): Promise<boolean> {
+    try {
+      email = email.toLowerCase();
+      const user = await User.findOne({ email });
+
+      if (!user) {
+        throw new Error('Usuario no existe');
+      }
+
+      const resetToken = uuidv4();
+      const resetTokenDate = new Date(Date.now() + 60 * 60 * 24 * 1000);
+
+      user.resetToken = resetToken;
+      user.resetTokenExpiry = resetTokenDate;
+      await user.save();
+
+      await sendEmail(
+        user.email,
+        'RESET CONSTRASEÑA',
+        `<a href='http://localhost:3000/auth/reset-password/${user.resetToken}'>Haga click aqui para resetear su contraseña</a>`
+      );
+
+      return true;
+    } catch (err) {
+      throw new Error(err.message);
+    }
+  }
+
+  @Mutation(() => Boolean)
+  async resetPassword(
+    @Arg('input') input: ResetPasswordInput,
+    @Ctx() { entityManager }: MyContext
+  ): Promise<boolean> {
+    try {
+      input.email = input.email.toLowerCase();
+      const user = await entityManager.findOne(User, {
+        resetToken: input.resetToken,
+        resetTokenExpiry: LessThanOrEqual(new Date(Date.now() + 60 * 60 * 24 * 1000)),
+      });
+
+      if (!user) {
+        throw new Error('Token invalido o expirado');
+      }
+
+      const newHashedPassword = await argon2.hash(input.password);
+
+      user.password = newHashedPassword;
+      //reset token para que sea de un solo uso sin
+      //posibilidad de replicarlo
+      user.resetToken = null as any;
+      user.resetTokenExpiry = null as any;
+      await user.save();
+
+      return true;
+    } catch (err) {
+      throw new Error(err.message);
+    }
   }
 }

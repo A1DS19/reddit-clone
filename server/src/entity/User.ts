@@ -29,6 +29,12 @@ export class User extends BaseEntity {
   @Column('int', { default: 0 })
   count: number;
 
+  @Column('text', { default: null, nullable: true })
+  resetToken: string;
+
+  @Column('date', { default: null, nullable: true })
+  resetTokenExpiry: Date;
+
   @Field(() => Date)
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

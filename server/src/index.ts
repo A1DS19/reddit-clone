@@ -1,9 +1,9 @@
-import { createTokens } from './util/token';
+import { User } from './entity/User';
 import 'dotenv/config';
 import 'reflect-metadata';
 import { ApolloServer } from 'apollo-server-express';
 import { buildSchema } from 'type-graphql';
-import { createConnection } from 'typeorm';
+import { createConnection, getManager } from 'typeorm';
 import { Auth } from './resolvers/auth/Auth';
 import cors from 'cors';
 import express from 'express';
@@ -13,6 +13,7 @@ import { manageTokens } from './middleware/manageTokens';
 
 (async () => {
   await createConnection();
+  const entityManager = getManager();
 
   const app = express();
   const PORT = process.env.PORT || 4000;
@@ -33,7 +34,7 @@ import { manageTokens } from './middleware/manageTokens';
       resolvers: [Auth],
     }),
     formatError: (error: GraphQLError) => error,
-    context: ({ req, res }) => ({ req, res }),
+    context: ({ req, res }) => ({ req, res, entityManager: entityManager }),
   });
 
   server.applyMiddleware({ app, cors: false });

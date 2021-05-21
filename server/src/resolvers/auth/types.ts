@@ -1,5 +1,5 @@
-import { IsEmail, Length } from 'class-validator';
-import { InputType, Field, ObjectType } from 'type-graphql';
+import { IsEmail, IsString, Length } from 'class-validator';
+import { InputType, Field } from 'type-graphql';
 
 @InputType()
 export class RegisterInput {
@@ -25,4 +25,19 @@ export class LoginInput {
   @Field(() => String)
   @Length(0, 255, { message: 'Debe agregar una contraseña' })
   password: string;
+}
+
+@InputType()
+export class ResetPasswordInput {
+  @Field(() => String)
+  @IsEmail(undefined, { message: 'Debe agregar un email valido' })
+  email: string;
+
+  @Field(() => String)
+  @Length(5, 255, { message: 'La contraseña debe tener al menos 5 carateres' })
+  password: string;
+
+  @Field(() => String)
+  @IsString()
+  resetToken: string;
 }

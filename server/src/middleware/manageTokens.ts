@@ -24,13 +24,18 @@ export const manageTokens = async (req: any, res: Response, next: NextFunction) 
   let data;
   try {
     data = verify(refreshToken, process.env.JWT_REFRESH_TOKEN_SECRET) as any;
-    console.log(data);
   } catch {
     return next();
   }
 
   const user = await User.findOne({ id: data.userId });
-  if (!user || user.count !== data.count) {
+
+  if (!user) {
+    return next();
+  }
+
+  if (user.count !== data.count) {
+    console.log(`COUNT TOKEN: ${data.count}`, `USER COUNT DB: ${user.count}`);
     return next();
   }
 

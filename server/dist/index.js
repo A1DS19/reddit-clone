@@ -23,6 +23,7 @@ const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const manageTokens_1 = require("./middleware/manageTokens");
 (() => __awaiter(this, void 0, void 0, function* () {
     yield typeorm_1.createConnection();
+    const entityManager = typeorm_1.getManager();
     const app = express_1.default();
     const PORT = process.env.PORT || 4000;
     const env = process.env.NODE_ENV || 'development';
@@ -36,7 +37,7 @@ const manageTokens_1 = require("./middleware/manageTokens");
             resolvers: [Auth_1.Auth],
         }),
         formatError: (error) => error,
-        context: ({ req, res }) => ({ req, res }),
+        context: ({ req, res }) => ({ req, res, entityManager: entityManager }),
     });
     server.applyMiddleware({ app, cors: false });
     app.listen(PORT, () => {
