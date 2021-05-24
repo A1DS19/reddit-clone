@@ -5,6 +5,7 @@ const createApolloClient = () =>
   new ApolloClient({
     uri: process.env.NODE_ENV === 'development' ? 'http://localhost:4000/graphql' : '',
     cache: new InMemoryCache(),
+    credentials: 'include',
     defaultOptions: {
       watchQuery: {
         fetchPolicy: 'cache-and-network',

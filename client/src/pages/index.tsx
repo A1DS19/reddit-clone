@@ -1,6 +1,6 @@
 import Head from 'next/head';
-import Image from 'next/image';
-import { useQuery, gql } from '@apollo/client';
+import React from 'react';
+import { Layout } from '../components/layout';
 
 export default function Home() {
   return (
@@ -10,7 +10,10 @@ export default function Home() {
         <meta name='description' content='Reddit clone ?!' />
         <link rel='icon' href='/favicon.ico' />
       </Head>
-      <h1>Hola</h1>
+
+      <Layout>
+        <h1>TEST</h1>
+      </Layout>
     </>
   );
 }

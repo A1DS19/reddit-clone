@@ -11,6 +11,11 @@ import { LessThanOrEqual } from 'typeorm';
 
 @Resolver(User)
 export class Auth {
+  @Query(() => String)
+  test(): string {
+    return 'HOLA GRAPHQL';
+  }
+
   @Query(() => User, { nullable: true })
   async me(@Ctx() { req }: MyContext): Promise<User> {
     try {
@@ -178,5 +183,16 @@ export class Auth {
     } catch (err) {
       throw new Error(err.message);
     }
+  }
+
+  @Mutation(() => Boolean)
+  logout(@Ctx() { req, res }: MyContext): boolean {
+    if (!(req as any).userId) {
+      return false;
+    }
+
+    res.clearCookie('access-token');
+    res.clearCookie('refresh-token');
+    return true;
   }
 }

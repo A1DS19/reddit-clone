@@ -1,4 +1,3 @@
-import { User } from './entity/User';
 import 'dotenv/config';
 import 'reflect-metadata';
 import { ApolloServer } from 'apollo-server-express';
@@ -24,6 +23,7 @@ import { manageTokens } from './middleware/manageTokens';
   app.use(
     cors({
       origin: env === 'development' ? 'http://localhost:3000' : '',
+      credentials: true,
     })
   );
 

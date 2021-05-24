@@ -30,6 +30,7 @@ const manageTokens_1 = require("./middleware/manageTokens");
     app.use(cookie_parser_1.default());
     app.use(cors_1.default({
         origin: env === 'development' ? 'http://localhost:3000' : '',
+        credentials: true,
     }));
     app.use((req, res, next) => __awaiter(this, void 0, void 0, function* () { return yield manageTokens_1.manageTokens(req, res, next); }));
     const server = new apollo_server_express_1.ApolloServer({
