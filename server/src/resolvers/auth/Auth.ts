@@ -160,7 +160,6 @@ export class Auth {
     @Ctx() { entityManager }: MyContext
   ): Promise<boolean> {
     try {
-      input.email = input.email.toLowerCase();
       const user = await entityManager.findOne(User, {
         resetToken: input.resetToken,
         resetTokenExpiry: LessThanOrEqual(new Date(Date.now() + 60 * 60 * 24 * 1000)),

@@ -53,11 +53,11 @@ export const Navbar: FunctionComponent<NavProps> = ({ user }): JSX.Element => {
                 me: null,
               },
             });
+
+            router.push('/');
           }
         },
       });
-
-      router.push('/');
     } catch (error) {
       console.log(error.message);
     }
@@ -75,7 +75,14 @@ export const Navbar: FunctionComponent<NavProps> = ({ user }): JSX.Element => {
             onClick={isOpen ? onClose : onOpen}
           />
           <HStack spacing={8} alignItems={'center'}>
-            <Image borderRadius='full' boxSize='40px' src='/reddit.png' alt='logo' />
+            <Image
+              borderRadius='full'
+              boxSize='40px'
+              src='/reddit.png'
+              alt='logo'
+              onClick={() => router.push('/')}
+              style={{ cursor: 'pointer' }}
+            />
             <HStack as={'nav'} spacing={4} display={{ base: 'none', md: 'flex' }}>
               {Links.map((link) => (
                 <NavLink key={link}>{link}</NavLink>

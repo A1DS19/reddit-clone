@@ -10,6 +10,8 @@ import {
   FormControl,
   FormLabel,
   Input,
+  Link,
+  Box,
 } from '@chakra-ui/react';
 import { ErrorMessageForm } from '../../components/common/ErrorMessageForm';
 import { Formik, FormikHelpers, Form, ErrorMessage, FormikProps } from 'formik';
@@ -103,6 +105,12 @@ export const Login: FunctionComponent<loginProps> = ({
                       />
                       <ErrorMessage name='password' component={ErrorMessageForm} />
                     </FormControl>
+
+                    <Box mt={1}>
+                      <Link href='/auth/forgot-password' color='blue.400'>
+                        Olvide mi contraseña
+                      </Link>
+                    </Box>
                   </ModalBody>
 
                   <ModalFooter>

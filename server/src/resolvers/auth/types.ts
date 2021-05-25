@@ -30,10 +30,6 @@ export class LoginInput {
 @InputType()
 export class ResetPasswordInput {
   @Field(() => String)
-  @IsEmail(undefined, { message: 'Debe agregar un email valido' })
-  email: string;
-
-  @Field(() => String)
   @Length(5, 255, { message: 'La contraseña debe tener al menos 5 carateres' })
   password: string;
 
