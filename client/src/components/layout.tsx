@@ -22,8 +22,3 @@ export const Layout: FunctionComponent<navbarProps> = ({
   );
 };
 
-/*
-const { colorMode, toggleColorMode } = useColorMode();
-<Button color='gray.400' variant='outline' onClick={toggleColorMode}>
-            {colorMode === 'dark' ? 'MODO CLARO' : 'MODO OSCURO'}
-          </Button> */

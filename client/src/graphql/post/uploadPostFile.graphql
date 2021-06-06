@@ -1,0 +1,3 @@
+mutation UploadFile($file: Upload, $postId: String!, $fileUrls: UrlFileInput) {
+  uploadPostFile(file: $file, postId: $postId, fileUrls: $fileUrls)
+}

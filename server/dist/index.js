@@ -21,9 +21,10 @@ const cors_1 = __importDefault(require("cors"));
 const express_1 = __importDefault(require("express"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const manageTokens_1 = require("./middleware/manageTokens");
+const Post_1 = require("./resolvers/posts/Post");
+const graphql_upload_1 = require("graphql-upload");
 (() => __awaiter(this, void 0, void 0, function* () {
     yield typeorm_1.createConnection();
-    const entityManager = typeorm_1.getManager();
     const app = express_1.default();
     const PORT = process.env.PORT || 4000;
     const env = process.env.NODE_ENV || 'development';
@@ -32,13 +33,17 @@ const manageTokens_1 = require("./middleware/manageTokens");
         origin: env === 'development' ? 'http://localhost:3000' : '',
         credentials: true,
     }));
+    app.use('/graphql', graphql_upload_1.graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 3 }));
     app.use((req, res, next) => __awaiter(this, void 0, void 0, function* () { return yield manageTokens_1.manageTokens(req, res, next); }));
     const server = new apollo_server_express_1.ApolloServer({
         schema: yield type_graphql_1.buildSchema({
-            resolvers: [Auth_1.Auth],
+            resolvers: [Auth_1.Auth, Post_1.Post],
         }),
+        debug: true,
+        tracing: true,
+        uploads: false,
         formatError: (error) => error,
-        context: ({ req, res }) => ({ req, res, entityManager: entityManager }),
+        context: ({ req, res }) => ({ req, res }),
     });
     server.applyMiddleware({ app, cors: false });
     app.listen(PORT, () => {

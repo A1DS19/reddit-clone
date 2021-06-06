@@ -1,5 +1,6 @@
 import Head from 'next/head';
 import React from 'react';
+import { CreatePost } from 'src/components/posts/CreatePost';
 import { Layout } from '../components/layout';
 
 export default function Home() {
@@ -12,7 +13,7 @@ export default function Home() {
       </Head>
 
       <Layout>
-        <h1>TEST</h1>
+        <CreatePost />
       </Layout>
     </>
   );

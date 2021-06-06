@@ -12,7 +12,7 @@ import { ErrorMessage, Form, Formik, FormikHelpers, FormikProps } from 'formik';
 import { Router, useRouter } from 'next/dist/client/router';
 import React from 'react';
 import { useState } from 'react';
-import { requestPasswordReset } from 'src/components/auth/validationSchema';
+import { requestPasswordReset } from '../../components/common/validationSchemas/validationSchema';
 import { ErrorMessageForm } from 'src/components/common/ErrorMessageForm';
 import { Layout } from 'src/components/layout';
 import { useRequestPasswordResetMutation } from 'src/generated/graphql';

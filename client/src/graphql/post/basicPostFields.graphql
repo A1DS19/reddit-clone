@@ -1,0 +1,8 @@
+fragment basicPostFields on Post {
+  id
+  title
+  body
+  files
+  votes
+  createdAt
+}

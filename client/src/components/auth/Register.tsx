@@ -16,7 +16,7 @@ import { ErrorMessageForm } from '../../components/common/ErrorMessageForm';
 import { Formik, Form, FormikProps, FormikHelpers, ErrorMessage } from 'formik';
 import React, { useState } from 'react';
 import { FunctionComponent } from 'react';
-import { registerValidationSchema } from './validationSchema';
+import { registerValidationSchema } from '../common/validationSchemas/validationSchema';
 import { MeDocument, useMeQuery, useRegisterMutation } from 'src/generated/graphql';
 import { useRouter } from 'next/dist/client/router';
 

@@ -1,3 +1,4 @@
+import '../../styles/dropzoneComponent.css';
 import { AppProps } from 'next/app';
 import { ApolloProvider } from '@apollo/client';
 import { ChakraProvider } from '@chakra-ui/react';

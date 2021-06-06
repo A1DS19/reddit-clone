@@ -14,8 +14,30 @@ export type Scalars = {
   Float: number;
   /** The javascript `Date` as string. Type represents date and time as the ISO Date string. */
   DateTime: any;
+  /** The `Upload` scalar type represents a file upload. */
+  Upload: any;
 };
 
+export type CreatePostInput = {
+  title: Scalars['String'];
+  body: Scalars['String'];
+};
+
+
+export type FetchPostInput = {
+  id: Scalars['String'];
+};
+
+export type FetchPostsInput = {
+  limit: Scalars['String'];
+  page: Scalars['String'];
+};
+
+export type FetchPostsResponse = {
+  __typename?: 'FetchPostsResponse';
+  posts: Array<Post>;
+  totalCount: Scalars['Int'];
+};
 
 export type LoginInput = {
   email: Scalars['String'];
@@ -30,6 +52,10 @@ export type Mutation = {
   requestReset: Scalars['Boolean'];
   resetPassword: Scalars['Boolean'];
   logout: Scalars['Boolean'];
+  uploadPostFile: Scalars['Boolean'];
+  createPost: Post;
+  updatePost: Post;
+  deletePost: Scalars['Boolean'];
 };
 
 
@@ -52,10 +78,55 @@ export type MutationResetPasswordArgs = {
   input: ResetPasswordInput;
 };
 
+
+export type MutationUploadPostFileArgs = {
+  fileUrls?: Maybe<UrlFileInput>;
+  postId: Scalars['String'];
+  file?: Maybe<Scalars['Upload']>;
+};
+
+
+export type MutationCreatePostArgs = {
+  input: CreatePostInput;
+};
+
+
+export type MutationUpdatePostArgs = {
+  input: UpdatePostInput;
+  postId: Scalars['String'];
+};
+
+
+export type MutationDeletePostArgs = {
+  postId: Scalars['String'];
+};
+
+export type Post = {
+  __typename?: 'Post';
+  id: Scalars['ID'];
+  title: Scalars['String'];
+  body: Scalars['String'];
+  votes: Scalars['Int'];
+  files: Array<Scalars['String']>;
+  createdAt: Scalars['DateTime'];
+  updatedAt: Scalars['DateTime'];
+};
+
 export type Query = {
   __typename?: 'Query';
-  test: Scalars['String'];
   me?: Maybe<User>;
+  fetchPost?: Maybe<Post>;
+  fetchPosts?: Maybe<FetchPostsResponse>;
+};
+
+
+export type QueryFetchPostArgs = {
+  input: FetchPostInput;
+};
+
+
+export type QueryFetchPostsArgs = {
+  input: FetchPostsInput;
 };
 
 export type RegisterInput = {
@@ -67,6 +138,16 @@ export type RegisterInput = {
 export type ResetPasswordInput = {
   password: Scalars['String'];
   resetToken: Scalars['String'];
+};
+
+export type UpdatePostInput = {
+  title: Scalars['String'];
+  body: Scalars['String'];
+};
+
+
+export type UrlFileInput = {
+  files: Array<Scalars['String']>;
 };
 
 export type User = {
@@ -132,6 +213,36 @@ export type ResetPasswordMutation = (
   & Pick<Mutation, 'resetPassword'>
 );
 
+export type BasicPostFieldsFragment = (
+  { __typename?: 'Post' }
+  & Pick<Post, 'id' | 'title' | 'body' | 'files' | 'votes' | 'createdAt'>
+);
+
+export type CreatePostMutationVariables = Exact<{
+  input: CreatePostInput;
+}>;
+
+
+export type CreatePostMutation = (
+  { __typename?: 'Mutation' }
+  & { createPost: (
+    { __typename?: 'Post' }
+    & BasicPostFieldsFragment
+  ) }
+);
+
+export type UploadFileMutationVariables = Exact<{
+  file?: Maybe<Scalars['Upload']>;
+  postId: Scalars['String'];
+  fileUrls?: Maybe<UrlFileInput>;
+}>;
+
+
+export type UploadFileMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<Mutation, 'uploadPostFile'>
+);
+
 export type BasicUserFieldsFragment = (
   { __typename?: 'User' }
   & Pick<User, 'id' | 'email' | 'username'>
@@ -148,6 +259,16 @@ export type MeQuery = (
   )> }
 );
 
+export const BasicPostFieldsFragmentDoc = gql`
+    fragment basicPostFields on Post {
+  id
+  title
+  body
+  files
+  votes
+  createdAt
+}
+    `;
 export const BasicUserFieldsFragmentDoc = gql`
     fragment basicUserFields on User {
   id
@@ -313,6 +434,72 @@ export function useResetPasswordMutation(baseOptions?: Apollo.MutationHookOption
 export type ResetPasswordMutationHookResult = ReturnType<typeof useResetPasswordMutation>;
 export type ResetPasswordMutationResult = Apollo.MutationResult<ResetPasswordMutation>;
 export type ResetPasswordMutationOptions = Apollo.BaseMutationOptions<ResetPasswordMutation, ResetPasswordMutationVariables>;
+export const CreatePostDocument = gql`
+    mutation CreatePost($input: CreatePostInput!) {
+  createPost(input: $input) {
+    ...basicPostFields
+  }
+}
+    ${BasicPostFieldsFragmentDoc}`;
+export type CreatePostMutationFn = Apollo.MutationFunction<CreatePostMutation, CreatePostMutationVariables>;
+
+/**
+ * __useCreatePostMutation__
+ *
+ * To run a mutation, you first call `useCreatePostMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreatePostMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createPostMutation, { data, loading, error }] = useCreatePostMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreatePostMutation(baseOptions?: Apollo.MutationHookOptions<CreatePostMutation, CreatePostMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreatePostMutation, CreatePostMutationVariables>(CreatePostDocument, options);
+      }
+export type CreatePostMutationHookResult = ReturnType<typeof useCreatePostMutation>;
+export type CreatePostMutationResult = Apollo.MutationResult<CreatePostMutation>;
+export type CreatePostMutationOptions = Apollo.BaseMutationOptions<CreatePostMutation, CreatePostMutationVariables>;
+export const UploadFileDocument = gql`
+    mutation UploadFile($file: Upload, $postId: String!, $fileUrls: UrlFileInput) {
+  uploadPostFile(file: $file, postId: $postId, fileUrls: $fileUrls)
+}
+    `;
+export type UploadFileMutationFn = Apollo.MutationFunction<UploadFileMutation, UploadFileMutationVariables>;
+
+/**
+ * __useUploadFileMutation__
+ *
+ * To run a mutation, you first call `useUploadFileMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUploadFileMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [uploadFileMutation, { data, loading, error }] = useUploadFileMutation({
+ *   variables: {
+ *      file: // value for 'file'
+ *      postId: // value for 'postId'
+ *      fileUrls: // value for 'fileUrls'
+ *   },
+ * });
+ */
+export function useUploadFileMutation(baseOptions?: Apollo.MutationHookOptions<UploadFileMutation, UploadFileMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UploadFileMutation, UploadFileMutationVariables>(UploadFileDocument, options);
+      }
+export type UploadFileMutationHookResult = ReturnType<typeof useUploadFileMutation>;
+export type UploadFileMutationResult = Apollo.MutationResult<UploadFileMutation>;
+export type UploadFileMutationOptions = Apollo.BaseMutationOptions<UploadFileMutation, UploadFileMutationVariables>;
 export const MeDocument = gql`
     query Me {
   me {

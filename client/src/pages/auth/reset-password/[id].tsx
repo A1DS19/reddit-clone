@@ -13,7 +13,7 @@ import { Formik, FormikHelpers, FormikProps, Form, ErrorMessage } from 'formik';
 import { useRouter } from 'next/dist/client/router';
 import React from 'react';
 import { useState } from 'react';
-import { resetPasswordSchema } from 'src/components/auth/validationSchema';
+import { resetPasswordSchema } from '../../../components/common/validationSchemas/validationSchema';
 import { ErrorMessageForm } from 'src/components/common/ErrorMessageForm';
 import { Layout } from 'src/components/layout';
 import { useResetPasswordMutation } from 'src/generated/graphql';

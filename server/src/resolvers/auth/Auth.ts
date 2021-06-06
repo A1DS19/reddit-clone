@@ -11,11 +11,6 @@ import { LessThanOrEqual } from 'typeorm';
 
 @Resolver(User)
 export class Auth {
-  @Query(() => String)
-  test(): string {
-    return 'HOLA GRAPHQL';
-  }
-
   @Query(() => User, { nullable: true })
   async me(@Ctx() { req }: MyContext): Promise<User> {
     try {

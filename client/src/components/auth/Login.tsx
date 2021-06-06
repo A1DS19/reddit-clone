@@ -17,7 +17,7 @@ import { ErrorMessageForm } from '../../components/common/ErrorMessageForm';
 import { Formik, FormikHelpers, Form, ErrorMessage, FormikProps } from 'formik';
 import React from 'react';
 import { FunctionComponent } from 'react';
-import { loginValidationSchema } from './validationSchema';
+import { loginValidationSchema } from '../common/validationSchemas/validationSchema';
 import { MeDocument, useLoginMutation } from 'src/generated/graphql';
 import { useState } from 'react';
 
@@ -40,7 +40,9 @@ export const Login: FunctionComponent<loginProps> = ({
     email: '',
     password: '',
   };
-  const [login, { data, loading, error: loginError }] = useLoginMutation();
+  const [login, { data, loading, error: loginError }] = useLoginMutation({
+    onCompleted: () => onClose(),
+  });
   const [error, setError] = useState('');
 
   return (
@@ -68,9 +70,9 @@ export const Login: FunctionComponent<loginProps> = ({
                   refetchQueries: [{ query: MeDocument }],
                 });
 
-                if (data?.login && !loginError) {
-                  onClose();
-                }
+                // if (data?.login && !loginError) {
+                //   onClose();
+                // }
               } catch (error) {
                 setError(error.message);
               }

@@ -6,10 +6,12 @@ import {
   BaseEntity,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
+import { Post } from './Post';
 
 @ObjectType()
-@Entity()
+@Entity({ name: 'user' })
 export class User extends BaseEntity {
   @Field(() => ID)
   @PrimaryGeneratedColumn()
@@ -34,6 +36,13 @@ export class User extends BaseEntity {
 
   @Column('date', { default: null, nullable: true })
   resetTokenExpiry: Date;
+
+  //One user -> Many posts
+  @OneToMany('post', (post: Post) => post.user, {
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+  })
+  posts: Array<Post>;
 
   @Field(() => Date)
   @CreateDateColumn({ name: 'created_at' })
