@@ -1,0 +1,9 @@
+query FetchPosts($limit: Int!, $cursor: String) {
+  fetchPosts(limit: $limit, cursor: $cursor) {
+    posts {
+      ...basicPostFields
+    }
+    hasMore
+    totalCount
+  }
+}

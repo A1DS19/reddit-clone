@@ -10,7 +10,8 @@ interface CreatePostProps {}
 export const CreatePost: React.FC<CreatePostProps> = ({}): JSX.Element => {
   const router = useRouter();
   return (
-    <Box p={4} width='60%' margin='0 auto' bg='gray.900' display='flex'>
+    //margin='0 auto'
+    <Box p={4} width='100%' bg='gray.900' display='flex'>
       <Avatar size={'sm'} src={(<VscAccount />) as any} m='auto' />
       <Input
         ml={3}

@@ -28,14 +28,10 @@ export type FetchPostInput = {
   id: Scalars['String'];
 };
 
-export type FetchPostsInput = {
-  limit: Scalars['String'];
-  page: Scalars['String'];
-};
-
 export type FetchPostsResponse = {
   __typename?: 'FetchPostsResponse';
   posts: Array<Post>;
+  hasMore: Scalars['Boolean'];
   totalCount: Scalars['Int'];
 };
 
@@ -126,7 +122,8 @@ export type QueryFetchPostArgs = {
 
 
 export type QueryFetchPostsArgs = {
-  input: FetchPostsInput;
+  cursor?: Maybe<Scalars['String']>;
+  limit: Scalars['Int'];
 };
 
 export type RegisterInput = {
@@ -229,6 +226,24 @@ export type CreatePostMutation = (
     { __typename?: 'Post' }
     & BasicPostFieldsFragment
   ) }
+);
+
+export type FetchPostsQueryVariables = Exact<{
+  limit: Scalars['Int'];
+  cursor?: Maybe<Scalars['String']>;
+}>;
+
+
+export type FetchPostsQuery = (
+  { __typename?: 'Query' }
+  & { fetchPosts?: Maybe<(
+    { __typename?: 'FetchPostsResponse' }
+    & Pick<FetchPostsResponse, 'hasMore' | 'totalCount'>
+    & { posts: Array<(
+      { __typename?: 'Post' }
+      & BasicPostFieldsFragment
+    )> }
+  )> }
 );
 
 export type UploadFileMutationVariables = Exact<{
@@ -467,6 +482,46 @@ export function useCreatePostMutation(baseOptions?: Apollo.MutationHookOptions<C
 export type CreatePostMutationHookResult = ReturnType<typeof useCreatePostMutation>;
 export type CreatePostMutationResult = Apollo.MutationResult<CreatePostMutation>;
 export type CreatePostMutationOptions = Apollo.BaseMutationOptions<CreatePostMutation, CreatePostMutationVariables>;
+export const FetchPostsDocument = gql`
+    query FetchPosts($limit: Int!, $cursor: String) {
+  fetchPosts(limit: $limit, cursor: $cursor) {
+    posts {
+      ...basicPostFields
+    }
+    hasMore
+    totalCount
+  }
+}
+    ${BasicPostFieldsFragmentDoc}`;
+
+/**
+ * __useFetchPostsQuery__
+ *
+ * To run a query within a React component, call `useFetchPostsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFetchPostsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFetchPostsQuery({
+ *   variables: {
+ *      limit: // value for 'limit'
+ *      cursor: // value for 'cursor'
+ *   },
+ * });
+ */
+export function useFetchPostsQuery(baseOptions: Apollo.QueryHookOptions<FetchPostsQuery, FetchPostsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FetchPostsQuery, FetchPostsQueryVariables>(FetchPostsDocument, options);
+      }
+export function useFetchPostsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FetchPostsQuery, FetchPostsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FetchPostsQuery, FetchPostsQueryVariables>(FetchPostsDocument, options);
+        }
+export type FetchPostsQueryHookResult = ReturnType<typeof useFetchPostsQuery>;
+export type FetchPostsLazyQueryHookResult = ReturnType<typeof useFetchPostsLazyQuery>;
+export type FetchPostsQueryResult = Apollo.QueryResult<FetchPostsQuery, FetchPostsQueryVariables>;
 export const UploadFileDocument = gql`
     mutation UploadFile($file: Upload, $postId: String!, $fileUrls: UrlFileInput) {
   uploadPostFile(file: $file, postId: $postId, fileUrls: $fileUrls)

@@ -1,19 +1,19 @@
 import {
   CreatePostInput,
   FetchPostInput,
-  FetchPostsInput,
   FetchPostsResponse,
   UpdatePostInput,
   UrlFileInput,
 } from './types';
 import { MyContext } from 'src/types/MyContext';
 import { isAuth } from './../../middleware/isAuth';
-import { Arg, Ctx, Mutation, Query, Resolver, UseMiddleware } from 'type-graphql';
+import { Arg, Ctx, Mutation, Query, Resolver, UseMiddleware, Int } from 'type-graphql';
 import { Post as PostEntity } from './../../entity/Post';
-import { getConnection } from 'typeorm';
+import { getManager, LessThanOrEqual, getConnection, LessThan } from 'typeorm';
 import { GraphQLUpload, FileUpload } from 'graphql-upload';
 import { upload_post_file } from '../../services/cloudinary';
 
+//Crear fieldResolver para body
 @Resolver(PostEntity)
 export class Post {
   @Query(() => PostEntity, { nullable: true })
@@ -28,17 +28,33 @@ export class Post {
   }
 
   @Query(() => FetchPostsResponse, { nullable: true })
-  async fetchPosts(@Arg('input') input: FetchPostsInput): Promise<FetchPostsResponse> {
-    const limit = Number(input.limit) || 10;
-    const page = Number(input.page) || 1;
+  async fetchPosts(
+    @Arg('limit', () => Int) limit: number,
+    @Arg('cursor', () => String, { nullable: true }) cursorID: string | null
+  ): Promise<FetchPostsResponse> {
+    const realLimit = Math.min(50, limit);
+    const realLimitPlusOne = realLimit + 1;
+    const entityManager = getManager();
+    let [posts, totalCount]: any = [];
 
-    const [result, totalCount] = await PostEntity.findAndCount({
-      take: limit,
-      skip: (page - 1) * limit,
-      order: { createdAt: -1 },
-    });
+    if (cursorID) {
+      [posts, totalCount] = await entityManager.findAndCount(PostEntity, {
+        where: { createdAt: LessThan(new Date(cursorID as string)) },
+        order: { createdAt: 'DESC' },
+        take: realLimitPlusOne,
+      });
+    } else {
+      [posts, totalCount] = await entityManager.findAndCount(PostEntity, {
+        order: { createdAt: 'DESC' },
+        take: realLimitPlusOne,
+      });
+    }
 
-    return { posts: result, totalCount: totalCount };
+    return {
+      posts: posts.slice(0, realLimit),
+      hasMore: posts.length === realLimitPlusOne,
+      totalCount,
+    };
   }
 
   @Mutation(() => Boolean)
@@ -149,3 +165,13 @@ export class Post {
     return !!post;
   }
 }
+
+//Offset pagination
+// const real_limit = Number(limit) || 10;
+// const real_offset = Number(offset) || 1;
+
+// const [result, totalCount] = await PostEntity.findAndCount({
+//   take: real_limit,
+//   skip: (real_offset - 1) * real_limit,
+//   order: { createdAt: -1 },
+// });

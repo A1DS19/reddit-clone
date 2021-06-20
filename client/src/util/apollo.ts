@@ -1,24 +1,33 @@
+import { FetchPostsResponse } from './../generated/graphql';
 import { ApolloClient, InMemoryCache } from '@apollo/client';
 import { createUploadLink } from 'apollo-upload-client';
-import { useMemo } from 'react';
 
 const link = createUploadLink({
   uri: process.env.NODE_ENV === 'development' ? 'http://localhost:4000/graphql' : '',
   credentials: 'include',
 });
 
-const createApolloClient = () =>
+export const createApolloClient = () =>
   new ApolloClient({
     link: link as any,
-    cache: new InMemoryCache(),
-    defaultOptions: {
-      watchQuery: {
-        fetchPolicy: 'cache-and-network',
+    cache: new InMemoryCache({
+      typePolicies: {
+        Query: {
+          fields: {
+            fetchPosts: {
+              keyArgs: false,
+              merge(
+                existing: FetchPostsResponse | undefined,
+                incoming: FetchPostsResponse
+              ): FetchPostsResponse {
+                return {
+                  ...incoming,
+                  posts: [...(existing?.posts || []), ...incoming.posts],
+                };
+              },
+            },
+          },
+        },
       },
-    },
+    }),
   });
-
-export function useApollo() {
-  const client = useMemo(() => createApolloClient(), []);
-  return client;
-}

@@ -1,15 +1,14 @@
 import '../../styles/dropzoneComponent.css';
+import 'react-responsive-carousel/lib/styles/carousel.min.css'; // requires a loader
 import { AppProps } from 'next/app';
 import { ApolloProvider } from '@apollo/client';
 import { ChakraProvider } from '@chakra-ui/react';
 import { theme } from '../../styles/theme';
-import { useApollo } from '../util/apollo';
+import { createApolloClient } from '../util/apollo';
 
 function MyApp({ Component, pageProps }: AppProps) {
-  const client = useApollo();
-
   return (
-    <ApolloProvider client={client}>
+    <ApolloProvider client={createApolloClient()}>
       <ChakraProvider theme={theme}>
         <Component {...pageProps} />
       </ChakraProvider>

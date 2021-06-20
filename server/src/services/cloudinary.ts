@@ -30,6 +30,7 @@ export const upload_post_file = async (
             }
 
             if (data) {
+              console.log(data.url);
               resolve(data.url);
             }
           }

@@ -1,6 +1,7 @@
 import { ArrayMaxSize, Length } from 'class-validator';
 import { Post } from '../../entity/Post';
 import { Field, InputType, Int, ObjectType } from 'type-graphql';
+import { Cursor } from 'typeorm-cursor-pagination';
 
 @InputType()
 export class UrlFileInput {
@@ -26,19 +27,13 @@ export class FetchPostInput {
   id: string;
 }
 
-@InputType()
-export class FetchPostsInput {
-  @Field(() => String)
-  limit: number;
-
-  @Field(() => String)
-  page: number;
-}
-
 @ObjectType()
 export class FetchPostsResponse {
   @Field(() => [Post])
-  posts: Array<Post>;
+  posts: Post[];
+
+  @Field(() => Boolean)
+  hasMore: boolean;
 
   @Field(() => Int)
   totalCount: number;
