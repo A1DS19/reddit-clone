@@ -1,0 +1,6 @@
+query FetchPost($input: FetchPostInput!) {
+  fetchPost(input: $input) {
+    id
+    body
+  }
+}

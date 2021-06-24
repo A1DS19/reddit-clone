@@ -1,7 +1,6 @@
-import { ArrayMaxSize, Length } from 'class-validator';
+import { ArrayMaxSize, isInt, Length, Min } from 'class-validator';
 import { Post } from '../../entity/Post';
 import { Field, InputType, Int, ObjectType } from 'type-graphql';
-import { Cursor } from 'typeorm-cursor-pagination';
 
 @InputType()
 export class UrlFileInput {
@@ -48,4 +47,14 @@ export class UpdatePostInput {
   @Field(() => String)
   @Length(5, 5000, { message: 'El cuerpo debe tener entre 5 y 5000 caracteres' })
   body?: string;
+}
+
+@InputType()
+export class VoteInput {
+  @Field(() => Int)
+  @Min(0, { message: 'El postId debe ser un numero' })
+  postId: number;
+
+  @Field(() => Int)
+  value: 1 | -1;
 }

@@ -6,10 +6,13 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   Timestamp,
   UpdateDateColumn,
 } from 'typeorm';
+import { Updoot } from './Updoot';
 import { User } from './User';
 
 @ObjectType()
@@ -31,6 +34,12 @@ export class Post extends BaseEntity {
   @Column('int', { default: 0 })
   votes: number;
 
+  @Field(() => Int, { nullable: true })
+  voteStatus: number | null; //puede ser 1, -1 o null
+
+  @OneToMany(() => Updoot, (updoot) => updoot.post)
+  updoots: Updoot[];
+
   @Field(() => [String])
   @Column('text', { array: true, default: [] })
   files: Array<string>;
@@ -38,13 +47,14 @@ export class Post extends BaseEntity {
   //usualmente incluido para mapear mas facilmente...
   //igual al JoinColumn({name:'user_id'})
   @Column('int')
-  user_id: number;
+  creator_id: number;
 
   //Many Post -> One User
+  @Field(() => User, { nullable: true })
   @ManyToOne(() => User, (user: User) => user.posts)
   //specify custom column name or custom referenced column.
-  @JoinColumn({ name: 'user_id' })
-  user: User;
+  @JoinColumn({ name: 'creator_id' })
+  creator: User;
 
   @Field(() => Date)
   @CreateDateColumn({ name: 'created_at' })

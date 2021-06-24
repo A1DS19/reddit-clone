@@ -1,4 +1,5 @@
 import '../../styles/dropzoneComponent.css';
+import '../../styles/globals.css';
 import 'react-responsive-carousel/lib/styles/carousel.min.css'; // requires a loader
 import { AppProps } from 'next/app';
 import { ApolloProvider } from '@apollo/client';

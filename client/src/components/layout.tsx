@@ -1,6 +1,6 @@
 import { Box } from '@chakra-ui/react';
 import React, { FunctionComponent, ReactNode } from 'react';
-import { useMeQuery } from 'src/generated/graphql';
+import { getCurrentUser } from '../util/currentUser';
 import { Navbar } from './nav/Nav';
 
 interface navbarProps {}
@@ -8,7 +8,7 @@ interface navbarProps {}
 export const Layout: FunctionComponent<navbarProps> = ({
   children,
 }): JSX.Element | null => {
-  const { data, loading } = useMeQuery();
+  const { data, loading } = getCurrentUser();
 
   if (loading) return null;
 
@@ -21,4 +21,3 @@ export const Layout: FunctionComponent<navbarProps> = ({
     </React.Fragment>
   );
 };
-

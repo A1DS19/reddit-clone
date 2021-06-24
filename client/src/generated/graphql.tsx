@@ -2,9 +2,11 @@ import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
 export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
-export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
-export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
-const defaultOptions =  {}
+export type MakeOptional<T, K extends keyof T> = Omit<T, K> &
+  { [SubKey in K]?: Maybe<T[SubKey]> };
+export type MakeMaybe<T, K extends keyof T> = Omit<T, K> &
+  { [SubKey in K]: Maybe<T[SubKey]> };
+const defaultOptions = {};
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -22,7 +24,6 @@ export type CreatePostInput = {
   title: Scalars['String'];
   body: Scalars['String'];
 };
-
 
 export type FetchPostInput = {
   id: Scalars['String'];
@@ -48,32 +49,32 @@ export type Mutation = {
   requestReset: Scalars['Boolean'];
   resetPassword: Scalars['Boolean'];
   logout: Scalars['Boolean'];
+  vote: Post;
   uploadPostFile: Scalars['Boolean'];
   createPost: Post;
   updatePost: Post;
   deletePost: Scalars['Boolean'];
 };
 
-
 export type MutationRegisterArgs = {
   input: RegisterInput;
 };
-
 
 export type MutationLoginArgs = {
   input: LoginInput;
 };
 
-
 export type MutationRequestResetArgs = {
   email: Scalars['String'];
 };
-
 
 export type MutationResetPasswordArgs = {
   input: ResetPasswordInput;
 };
 
+export type MutationVoteArgs = {
+  input: VoteInput;
+};
 
 export type MutationUploadPostFileArgs = {
   fileUrls?: Maybe<UrlFileInput>;
@@ -81,17 +82,14 @@ export type MutationUploadPostFileArgs = {
   file?: Maybe<Scalars['Upload']>;
 };
 
-
 export type MutationCreatePostArgs = {
   input: CreatePostInput;
 };
-
 
 export type MutationUpdatePostArgs = {
   input: UpdatePostInput;
   postId: Scalars['String'];
 };
-
 
 export type MutationDeletePostArgs = {
   postId: Scalars['String'];
@@ -103,9 +101,12 @@ export type Post = {
   title: Scalars['String'];
   body: Scalars['String'];
   votes: Scalars['Int'];
+  voteStatus?: Maybe<Scalars['Int']>;
   files: Array<Scalars['String']>;
+  creator?: Maybe<User>;
   createdAt: Scalars['DateTime'];
   updatedAt: Scalars['DateTime'];
+  bodySnippet: Scalars['String'];
 };
 
 export type Query = {
@@ -115,11 +116,9 @@ export type Query = {
   fetchPosts?: Maybe<FetchPostsResponse>;
 };
 
-
 export type QueryFetchPostArgs = {
   input: FetchPostInput;
 };
-
 
 export type QueryFetchPostsArgs = {
   cursor?: Maybe<Scalars['String']>;
@@ -142,7 +141,6 @@ export type UpdatePostInput = {
   body: Scalars['String'];
 };
 
-
 export type UrlFileInput = {
   files: Array<Scalars['String']>;
 };
@@ -156,95 +154,83 @@ export type User = {
   updatedAt: Scalars['DateTime'];
 };
 
+export type VoteInput = {
+  postId: Scalars['Int'];
+  value: Scalars['Int'];
+};
+
 export type LoginMutationVariables = Exact<{
   input: LoginInput;
 }>;
 
+export type LoginMutation = { __typename?: 'Mutation' } & {
+  login: { __typename?: 'User' } & BasicUserFieldsFragment;
+};
 
-export type LoginMutation = (
-  { __typename?: 'Mutation' }
-  & { login: (
-    { __typename?: 'User' }
-    & BasicUserFieldsFragment
-  ) }
-);
+export type LogoutMutationVariables = Exact<{ [key: string]: never }>;
 
-export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
-
-
-export type LogoutMutation = (
-  { __typename?: 'Mutation' }
-  & Pick<Mutation, 'logout'>
-);
+export type LogoutMutation = { __typename?: 'Mutation' } & Pick<Mutation, 'logout'>;
 
 export type RegisterMutationVariables = Exact<{
   input: RegisterInput;
 }>;
 
-
-export type RegisterMutation = (
-  { __typename?: 'Mutation' }
-  & { register: (
-    { __typename?: 'User' }
-    & BasicUserFieldsFragment
-  ) }
-);
+export type RegisterMutation = { __typename?: 'Mutation' } & {
+  register: { __typename?: 'User' } & BasicUserFieldsFragment;
+};
 
 export type RequestPasswordResetMutationVariables = Exact<{
   email: Scalars['String'];
 }>;
 
-
-export type RequestPasswordResetMutation = (
-  { __typename?: 'Mutation' }
-  & Pick<Mutation, 'requestReset'>
-);
+export type RequestPasswordResetMutation = { __typename?: 'Mutation' } & Pick<
+  Mutation,
+  'requestReset'
+>;
 
 export type ResetPasswordMutationVariables = Exact<{
   input: ResetPasswordInput;
 }>;
 
+export type ResetPasswordMutation = { __typename?: 'Mutation' } & Pick<
+  Mutation,
+  'resetPassword'
+>;
 
-export type ResetPasswordMutation = (
-  { __typename?: 'Mutation' }
-  & Pick<Mutation, 'resetPassword'>
-);
-
-export type BasicPostFieldsFragment = (
-  { __typename?: 'Post' }
-  & Pick<Post, 'id' | 'title' | 'body' | 'files' | 'votes' | 'createdAt'>
-);
+export type BasicPostFieldsFragment = { __typename?: 'Post' } & Pick<
+  Post,
+  'id' | 'title' | 'bodySnippet' | 'files' | 'votes' | 'voteStatus' | 'createdAt'
+> & { creator?: Maybe<{ __typename?: 'User' } & Pick<User, 'id' | 'username'>> };
 
 export type CreatePostMutationVariables = Exact<{
   input: CreatePostInput;
 }>;
 
+export type CreatePostMutation = { __typename?: 'Mutation' } & {
+  createPost: { __typename?: 'Post' } & BasicPostFieldsFragment;
+};
 
-export type CreatePostMutation = (
-  { __typename?: 'Mutation' }
-  & { createPost: (
-    { __typename?: 'Post' }
-    & BasicPostFieldsFragment
-  ) }
-);
+export type FetchPostQueryVariables = Exact<{
+  input: FetchPostInput;
+}>;
+
+export type FetchPostQuery = { __typename?: 'Query' } & {
+  fetchPost?: Maybe<{ __typename?: 'Post' } & Pick<Post, 'id' | 'body'>>;
+};
 
 export type FetchPostsQueryVariables = Exact<{
   limit: Scalars['Int'];
   cursor?: Maybe<Scalars['String']>;
 }>;
 
-
-export type FetchPostsQuery = (
-  { __typename?: 'Query' }
-  & { fetchPosts?: Maybe<(
-    { __typename?: 'FetchPostsResponse' }
-    & Pick<FetchPostsResponse, 'hasMore' | 'totalCount'>
-    & { posts: Array<(
-      { __typename?: 'Post' }
-      & BasicPostFieldsFragment
-    )> }
-  )> }
-);
+export type FetchPostsQuery = { __typename?: 'Query' } & {
+  fetchPosts?: Maybe<
+    { __typename?: 'FetchPostsResponse' } & Pick<
+      FetchPostsResponse,
+      'hasMore' | 'totalCount'
+    > & { posts: Array<{ __typename?: 'Post' } & BasicPostFieldsFragment> }
+  >;
+};
 
 export type UploadFileMutationVariables = Exact<{
   file?: Maybe<Scalars['Upload']>;
@@ -252,53 +238,64 @@ export type UploadFileMutationVariables = Exact<{
   fileUrls?: Maybe<UrlFileInput>;
 }>;
 
+export type UploadFileMutation = { __typename?: 'Mutation' } & Pick<
+  Mutation,
+  'uploadPostFile'
+>;
 
-export type UploadFileMutation = (
-  { __typename?: 'Mutation' }
-  & Pick<Mutation, 'uploadPostFile'>
-);
+export type VoteMutationVariables = Exact<{
+  input: VoteInput;
+}>;
 
-export type BasicUserFieldsFragment = (
-  { __typename?: 'User' }
-  & Pick<User, 'id' | 'email' | 'username'>
-);
+export type VoteMutation = { __typename?: 'Mutation' } & {
+  vote: { __typename?: 'Post' } & BasicPostFieldsFragment;
+};
 
-export type MeQueryVariables = Exact<{ [key: string]: never; }>;
+export type BasicUserFieldsFragment = { __typename?: 'User' } & Pick<
+  User,
+  'id' | 'email' | 'username'
+>;
 
+export type MeQueryVariables = Exact<{ [key: string]: never }>;
 
-export type MeQuery = (
-  { __typename?: 'Query' }
-  & { me?: Maybe<(
-    { __typename?: 'User' }
-    & BasicUserFieldsFragment
-  )> }
-);
+export type MeQuery = { __typename?: 'Query' } & {
+  me?: Maybe<{ __typename?: 'User' } & BasicUserFieldsFragment>;
+};
 
 export const BasicPostFieldsFragmentDoc = gql`
-    fragment basicPostFields on Post {
-  id
-  title
-  body
-  files
-  votes
-  createdAt
-}
-    `;
-export const BasicUserFieldsFragmentDoc = gql`
-    fragment basicUserFields on User {
-  id
-  email
-  username
-}
-    `;
-export const LoginDocument = gql`
-    mutation Login($input: LoginInput!) {
-  login(input: $input) {
-    ...basicUserFields
+  fragment basicPostFields on Post {
+    id
+    title
+    bodySnippet
+    files
+    votes
+    voteStatus
+    creator {
+      id
+      username
+    }
+    createdAt
   }
-}
-    ${BasicUserFieldsFragmentDoc}`;
-export type LoginMutationFn = Apollo.MutationFunction<LoginMutation, LoginMutationVariables>;
+`;
+export const BasicUserFieldsFragmentDoc = gql`
+  fragment basicUserFields on User {
+    id
+    email
+    username
+  }
+`;
+export const LoginDocument = gql`
+  mutation Login($input: LoginInput!) {
+    login(input: $input) {
+      ...basicUserFields
+    }
+  }
+  ${BasicUserFieldsFragmentDoc}
+`;
+export type LoginMutationFn = Apollo.MutationFunction<
+  LoginMutation,
+  LoginMutationVariables
+>;
 
 /**
  * __useLoginMutation__
@@ -317,19 +314,30 @@ export type LoginMutationFn = Apollo.MutationFunction<LoginMutation, LoginMutati
  *   },
  * });
  */
-export function useLoginMutation(baseOptions?: Apollo.MutationHookOptions<LoginMutation, LoginMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<LoginMutation, LoginMutationVariables>(LoginDocument, options);
-      }
+export function useLoginMutation(
+  baseOptions?: Apollo.MutationHookOptions<LoginMutation, LoginMutationVariables>
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<LoginMutation, LoginMutationVariables>(
+    LoginDocument,
+    options
+  );
+}
 export type LoginMutationHookResult = ReturnType<typeof useLoginMutation>;
 export type LoginMutationResult = Apollo.MutationResult<LoginMutation>;
-export type LoginMutationOptions = Apollo.BaseMutationOptions<LoginMutation, LoginMutationVariables>;
+export type LoginMutationOptions = Apollo.BaseMutationOptions<
+  LoginMutation,
+  LoginMutationVariables
+>;
 export const LogoutDocument = gql`
-    mutation Logout {
-  logout
-}
-    `;
-export type LogoutMutationFn = Apollo.MutationFunction<LogoutMutation, LogoutMutationVariables>;
+  mutation Logout {
+    logout
+  }
+`;
+export type LogoutMutationFn = Apollo.MutationFunction<
+  LogoutMutation,
+  LogoutMutationVariables
+>;
 
 /**
  * __useLogoutMutation__
@@ -347,21 +355,33 @@ export type LogoutMutationFn = Apollo.MutationFunction<LogoutMutation, LogoutMut
  *   },
  * });
  */
-export function useLogoutMutation(baseOptions?: Apollo.MutationHookOptions<LogoutMutation, LogoutMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<LogoutMutation, LogoutMutationVariables>(LogoutDocument, options);
-      }
+export function useLogoutMutation(
+  baseOptions?: Apollo.MutationHookOptions<LogoutMutation, LogoutMutationVariables>
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<LogoutMutation, LogoutMutationVariables>(
+    LogoutDocument,
+    options
+  );
+}
 export type LogoutMutationHookResult = ReturnType<typeof useLogoutMutation>;
 export type LogoutMutationResult = Apollo.MutationResult<LogoutMutation>;
-export type LogoutMutationOptions = Apollo.BaseMutationOptions<LogoutMutation, LogoutMutationVariables>;
+export type LogoutMutationOptions = Apollo.BaseMutationOptions<
+  LogoutMutation,
+  LogoutMutationVariables
+>;
 export const RegisterDocument = gql`
-    mutation Register($input: RegisterInput!) {
-  register(input: $input) {
-    ...basicUserFields
+  mutation Register($input: RegisterInput!) {
+    register(input: $input) {
+      ...basicUserFields
+    }
   }
-}
-    ${BasicUserFieldsFragmentDoc}`;
-export type RegisterMutationFn = Apollo.MutationFunction<RegisterMutation, RegisterMutationVariables>;
+  ${BasicUserFieldsFragmentDoc}
+`;
+export type RegisterMutationFn = Apollo.MutationFunction<
+  RegisterMutation,
+  RegisterMutationVariables
+>;
 
 /**
  * __useRegisterMutation__
@@ -380,19 +400,30 @@ export type RegisterMutationFn = Apollo.MutationFunction<RegisterMutation, Regis
  *   },
  * });
  */
-export function useRegisterMutation(baseOptions?: Apollo.MutationHookOptions<RegisterMutation, RegisterMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<RegisterMutation, RegisterMutationVariables>(RegisterDocument, options);
-      }
+export function useRegisterMutation(
+  baseOptions?: Apollo.MutationHookOptions<RegisterMutation, RegisterMutationVariables>
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<RegisterMutation, RegisterMutationVariables>(
+    RegisterDocument,
+    options
+  );
+}
 export type RegisterMutationHookResult = ReturnType<typeof useRegisterMutation>;
 export type RegisterMutationResult = Apollo.MutationResult<RegisterMutation>;
-export type RegisterMutationOptions = Apollo.BaseMutationOptions<RegisterMutation, RegisterMutationVariables>;
+export type RegisterMutationOptions = Apollo.BaseMutationOptions<
+  RegisterMutation,
+  RegisterMutationVariables
+>;
 export const RequestPasswordResetDocument = gql`
-    mutation RequestPasswordReset($email: String!) {
-  requestReset(email: $email)
-}
-    `;
-export type RequestPasswordResetMutationFn = Apollo.MutationFunction<RequestPasswordResetMutation, RequestPasswordResetMutationVariables>;
+  mutation RequestPasswordReset($email: String!) {
+    requestReset(email: $email)
+  }
+`;
+export type RequestPasswordResetMutationFn = Apollo.MutationFunction<
+  RequestPasswordResetMutation,
+  RequestPasswordResetMutationVariables
+>;
 
 /**
  * __useRequestPasswordResetMutation__
@@ -411,19 +442,36 @@ export type RequestPasswordResetMutationFn = Apollo.MutationFunction<RequestPass
  *   },
  * });
  */
-export function useRequestPasswordResetMutation(baseOptions?: Apollo.MutationHookOptions<RequestPasswordResetMutation, RequestPasswordResetMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<RequestPasswordResetMutation, RequestPasswordResetMutationVariables>(RequestPasswordResetDocument, options);
-      }
-export type RequestPasswordResetMutationHookResult = ReturnType<typeof useRequestPasswordResetMutation>;
-export type RequestPasswordResetMutationResult = Apollo.MutationResult<RequestPasswordResetMutation>;
-export type RequestPasswordResetMutationOptions = Apollo.BaseMutationOptions<RequestPasswordResetMutation, RequestPasswordResetMutationVariables>;
-export const ResetPasswordDocument = gql`
-    mutation ResetPassword($input: ResetPasswordInput!) {
-  resetPassword(input: $input)
+export function useRequestPasswordResetMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    RequestPasswordResetMutation,
+    RequestPasswordResetMutationVariables
+  >
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<
+    RequestPasswordResetMutation,
+    RequestPasswordResetMutationVariables
+  >(RequestPasswordResetDocument, options);
 }
-    `;
-export type ResetPasswordMutationFn = Apollo.MutationFunction<ResetPasswordMutation, ResetPasswordMutationVariables>;
+export type RequestPasswordResetMutationHookResult = ReturnType<
+  typeof useRequestPasswordResetMutation
+>;
+export type RequestPasswordResetMutationResult =
+  Apollo.MutationResult<RequestPasswordResetMutation>;
+export type RequestPasswordResetMutationOptions = Apollo.BaseMutationOptions<
+  RequestPasswordResetMutation,
+  RequestPasswordResetMutationVariables
+>;
+export const ResetPasswordDocument = gql`
+  mutation ResetPassword($input: ResetPasswordInput!) {
+    resetPassword(input: $input)
+  }
+`;
+export type ResetPasswordMutationFn = Apollo.MutationFunction<
+  ResetPasswordMutation,
+  ResetPasswordMutationVariables
+>;
 
 /**
  * __useResetPasswordMutation__
@@ -442,21 +490,36 @@ export type ResetPasswordMutationFn = Apollo.MutationFunction<ResetPasswordMutat
  *   },
  * });
  */
-export function useResetPasswordMutation(baseOptions?: Apollo.MutationHookOptions<ResetPasswordMutation, ResetPasswordMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<ResetPasswordMutation, ResetPasswordMutationVariables>(ResetPasswordDocument, options);
-      }
+export function useResetPasswordMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    ResetPasswordMutation,
+    ResetPasswordMutationVariables
+  >
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<ResetPasswordMutation, ResetPasswordMutationVariables>(
+    ResetPasswordDocument,
+    options
+  );
+}
 export type ResetPasswordMutationHookResult = ReturnType<typeof useResetPasswordMutation>;
 export type ResetPasswordMutationResult = Apollo.MutationResult<ResetPasswordMutation>;
-export type ResetPasswordMutationOptions = Apollo.BaseMutationOptions<ResetPasswordMutation, ResetPasswordMutationVariables>;
+export type ResetPasswordMutationOptions = Apollo.BaseMutationOptions<
+  ResetPasswordMutation,
+  ResetPasswordMutationVariables
+>;
 export const CreatePostDocument = gql`
-    mutation CreatePost($input: CreatePostInput!) {
-  createPost(input: $input) {
-    ...basicPostFields
+  mutation CreatePost($input: CreatePostInput!) {
+    createPost(input: $input) {
+      ...basicPostFields
+    }
   }
-}
-    ${BasicPostFieldsFragmentDoc}`;
-export type CreatePostMutationFn = Apollo.MutationFunction<CreatePostMutation, CreatePostMutationVariables>;
+  ${BasicPostFieldsFragmentDoc}
+`;
+export type CreatePostMutationFn = Apollo.MutationFunction<
+  CreatePostMutation,
+  CreatePostMutationVariables
+>;
 
 /**
  * __useCreatePostMutation__
@@ -475,24 +538,85 @@ export type CreatePostMutationFn = Apollo.MutationFunction<CreatePostMutation, C
  *   },
  * });
  */
-export function useCreatePostMutation(baseOptions?: Apollo.MutationHookOptions<CreatePostMutation, CreatePostMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<CreatePostMutation, CreatePostMutationVariables>(CreatePostDocument, options);
-      }
+export function useCreatePostMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    CreatePostMutation,
+    CreatePostMutationVariables
+  >
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<CreatePostMutation, CreatePostMutationVariables>(
+    CreatePostDocument,
+    options
+  );
+}
 export type CreatePostMutationHookResult = ReturnType<typeof useCreatePostMutation>;
 export type CreatePostMutationResult = Apollo.MutationResult<CreatePostMutation>;
-export type CreatePostMutationOptions = Apollo.BaseMutationOptions<CreatePostMutation, CreatePostMutationVariables>;
-export const FetchPostsDocument = gql`
-    query FetchPosts($limit: Int!, $cursor: String) {
-  fetchPosts(limit: $limit, cursor: $cursor) {
-    posts {
-      ...basicPostFields
+export type CreatePostMutationOptions = Apollo.BaseMutationOptions<
+  CreatePostMutation,
+  CreatePostMutationVariables
+>;
+export const FetchPostDocument = gql`
+  query FetchPost($input: FetchPostInput!) {
+    fetchPost(input: $input) {
+      id
+      body
     }
-    hasMore
-    totalCount
   }
+`;
+
+/**
+ * __useFetchPostQuery__
+ *
+ * To run a query within a React component, call `useFetchPostQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFetchPostQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFetchPostQuery({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useFetchPostQuery(
+  baseOptions: Apollo.QueryHookOptions<FetchPostQuery, FetchPostQueryVariables>
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<FetchPostQuery, FetchPostQueryVariables>(
+    FetchPostDocument,
+    options
+  );
 }
-    ${BasicPostFieldsFragmentDoc}`;
+export function useFetchPostLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<FetchPostQuery, FetchPostQueryVariables>
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<FetchPostQuery, FetchPostQueryVariables>(
+    FetchPostDocument,
+    options
+  );
+}
+export type FetchPostQueryHookResult = ReturnType<typeof useFetchPostQuery>;
+export type FetchPostLazyQueryHookResult = ReturnType<typeof useFetchPostLazyQuery>;
+export type FetchPostQueryResult = Apollo.QueryResult<
+  FetchPostQuery,
+  FetchPostQueryVariables
+>;
+export const FetchPostsDocument = gql`
+  query FetchPosts($limit: Int!, $cursor: String) {
+    fetchPosts(limit: $limit, cursor: $cursor) {
+      posts {
+        ...basicPostFields
+      }
+      hasMore
+      totalCount
+    }
+  }
+  ${BasicPostFieldsFragmentDoc}
+`;
 
 /**
  * __useFetchPostsQuery__
@@ -511,23 +635,39 @@ export const FetchPostsDocument = gql`
  *   },
  * });
  */
-export function useFetchPostsQuery(baseOptions: Apollo.QueryHookOptions<FetchPostsQuery, FetchPostsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<FetchPostsQuery, FetchPostsQueryVariables>(FetchPostsDocument, options);
-      }
-export function useFetchPostsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FetchPostsQuery, FetchPostsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<FetchPostsQuery, FetchPostsQueryVariables>(FetchPostsDocument, options);
-        }
+export function useFetchPostsQuery(
+  baseOptions: Apollo.QueryHookOptions<FetchPostsQuery, FetchPostsQueryVariables>
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<FetchPostsQuery, FetchPostsQueryVariables>(
+    FetchPostsDocument,
+    options
+  );
+}
+export function useFetchPostsLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<FetchPostsQuery, FetchPostsQueryVariables>
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<FetchPostsQuery, FetchPostsQueryVariables>(
+    FetchPostsDocument,
+    options
+  );
+}
 export type FetchPostsQueryHookResult = ReturnType<typeof useFetchPostsQuery>;
 export type FetchPostsLazyQueryHookResult = ReturnType<typeof useFetchPostsLazyQuery>;
-export type FetchPostsQueryResult = Apollo.QueryResult<FetchPostsQuery, FetchPostsQueryVariables>;
+export type FetchPostsQueryResult = Apollo.QueryResult<
+  FetchPostsQuery,
+  FetchPostsQueryVariables
+>;
 export const UploadFileDocument = gql`
-    mutation UploadFile($file: Upload, $postId: String!, $fileUrls: UrlFileInput) {
-  uploadPostFile(file: $file, postId: $postId, fileUrls: $fileUrls)
-}
-    `;
-export type UploadFileMutationFn = Apollo.MutationFunction<UploadFileMutation, UploadFileMutationVariables>;
+  mutation UploadFile($file: Upload, $postId: String!, $fileUrls: UrlFileInput) {
+    uploadPostFile(file: $file, postId: $postId, fileUrls: $fileUrls)
+  }
+`;
+export type UploadFileMutationFn = Apollo.MutationFunction<
+  UploadFileMutation,
+  UploadFileMutationVariables
+>;
 
 /**
  * __useUploadFileMutation__
@@ -548,20 +688,71 @@ export type UploadFileMutationFn = Apollo.MutationFunction<UploadFileMutation, U
  *   },
  * });
  */
-export function useUploadFileMutation(baseOptions?: Apollo.MutationHookOptions<UploadFileMutation, UploadFileMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<UploadFileMutation, UploadFileMutationVariables>(UploadFileDocument, options);
-      }
+export function useUploadFileMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    UploadFileMutation,
+    UploadFileMutationVariables
+  >
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<UploadFileMutation, UploadFileMutationVariables>(
+    UploadFileDocument,
+    options
+  );
+}
 export type UploadFileMutationHookResult = ReturnType<typeof useUploadFileMutation>;
 export type UploadFileMutationResult = Apollo.MutationResult<UploadFileMutation>;
-export type UploadFileMutationOptions = Apollo.BaseMutationOptions<UploadFileMutation, UploadFileMutationVariables>;
-export const MeDocument = gql`
-    query Me {
-  me {
-    ...basicUserFields
+export type UploadFileMutationOptions = Apollo.BaseMutationOptions<
+  UploadFileMutation,
+  UploadFileMutationVariables
+>;
+export const VoteDocument = gql`
+  mutation Vote($input: VoteInput!) {
+    vote(input: $input) {
+      ...basicPostFields
+    }
   }
+  ${BasicPostFieldsFragmentDoc}
+`;
+export type VoteMutationFn = Apollo.MutationFunction<VoteMutation, VoteMutationVariables>;
+
+/**
+ * __useVoteMutation__
+ *
+ * To run a mutation, you first call `useVoteMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useVoteMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [voteMutation, { data, loading, error }] = useVoteMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useVoteMutation(
+  baseOptions?: Apollo.MutationHookOptions<VoteMutation, VoteMutationVariables>
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<VoteMutation, VoteMutationVariables>(VoteDocument, options);
 }
-    ${BasicUserFieldsFragmentDoc}`;
+export type VoteMutationHookResult = ReturnType<typeof useVoteMutation>;
+export type VoteMutationResult = Apollo.MutationResult<VoteMutation>;
+export type VoteMutationOptions = Apollo.BaseMutationOptions<
+  VoteMutation,
+  VoteMutationVariables
+>;
+export const MeDocument = gql`
+  query Me {
+    me {
+      ...basicUserFields
+    }
+  }
+  ${BasicUserFieldsFragmentDoc}
+`;
 
 /**
  * __useMeQuery__
@@ -578,14 +769,18 @@ export const MeDocument = gql`
  *   },
  * });
  */
-export function useMeQuery(baseOptions?: Apollo.QueryHookOptions<MeQuery, MeQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<MeQuery, MeQueryVariables>(MeDocument, options);
-      }
-export function useMeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MeQuery, MeQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<MeQuery, MeQueryVariables>(MeDocument, options);
-        }
+export function useMeQuery(
+  baseOptions?: Apollo.QueryHookOptions<MeQuery, MeQueryVariables>
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<MeQuery, MeQueryVariables>(MeDocument, options);
+}
+export function useMeLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<MeQuery, MeQueryVariables>
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<MeQuery, MeQueryVariables>(MeDocument, options);
+}
 export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
 export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
 export type MeQueryResult = Apollo.QueryResult<MeQuery, MeQueryVariables>;

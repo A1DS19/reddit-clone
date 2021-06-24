@@ -9,6 +9,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { Post } from './Post';
+import { Updoot } from './Updoot';
 
 @ObjectType()
 @Entity({ name: 'user' })
@@ -38,11 +39,14 @@ export class User extends BaseEntity {
   resetTokenExpiry: Date;
 
   //One user -> Many posts
-  @OneToMany('post', (post: Post) => post.user, {
+  @OneToMany('post', (post: Post) => post.creator, {
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
   })
   posts: Array<Post>;
+
+  @OneToMany(() => Updoot, (updoot) => updoot.user)
+  updoots: Updoot[];
 
   @Field(() => Date)
   @CreateDateColumn({ name: 'created_at' })

@@ -4,27 +4,127 @@ import {
   FetchPostsResponse,
   UpdatePostInput,
   UrlFileInput,
+  VoteInput,
 } from './types';
 import { MyContext } from 'src/types/MyContext';
 import { isAuth } from './../../middleware/isAuth';
-import { Arg, Ctx, Mutation, Query, Resolver, UseMiddleware, Int } from 'type-graphql';
+import {
+  Arg,
+  Ctx,
+  Mutation,
+  Query,
+  Resolver,
+  UseMiddleware,
+  Int,
+  FieldResolver,
+  Root,
+} from 'type-graphql';
 import { Post as PostEntity } from './../../entity/Post';
-import { getManager, LessThanOrEqual, getConnection, LessThan } from 'typeorm';
+import { getManager, getConnection, LessThan } from 'typeorm';
 import { GraphQLUpload, FileUpload } from 'graphql-upload';
 import { upload_post_file } from '../../services/cloudinary';
+import { Updoot } from '../../entity/Updoot';
 
 //Crear fieldResolver para body
 @Resolver(PostEntity)
 export class Post {
+  @FieldResolver(() => String)
+  bodySnippet(@Root() post: PostEntity) {
+    return post.body.slice(0, 50);
+  }
+
+  //Basado en en entity Updoot va a buscar el postId por medio del
+  //Root y encontrar en el updoot el valor que concuerde con el post.id
+  //y el userId ese valor va a determinar el voteStatus ya que solo puede ser
+  //1 o -1.
+  @FieldResolver(() => Int, { nullable: true })
+  async voteStatus(@Root() post: PostEntity, @Ctx() { req }: MyContext) {
+    const userId = (req as any).userId;
+    if (!userId) {
+      return null;
+    }
+
+    const updoot = await Updoot.findOne({
+      postId: post.id,
+      userId: userId,
+    });
+
+    return updoot ? updoot.value : null;
+  }
+
   @Query(() => PostEntity, { nullable: true })
   async fetchPost(@Arg('input') { id }: FetchPostInput): Promise<PostEntity> {
-    const post = await PostEntity.findOne({ id: Number(id) });
+    const post = await PostEntity.findOne({ id: Number(id) }, { relations: ['creator'] });
 
     if (!post) {
       throw new Error('El post no existe');
     }
 
     return post;
+  }
+
+  @Mutation(() => PostEntity)
+  async vote(
+    @Arg('input') input: VoteInput,
+    @Ctx() { req }: MyContext
+  ): Promise<PostEntity> {
+    const { postId, value } = input;
+    const isUpdoot = value !== -1; //si el valor es un up vote
+    const realValue = isUpdoot ? 1 : -1; //decide cual valor es
+    const userId = (req as any).userId;
+
+    if (!userId) throw new Error('Debe iniciar sesion');
+
+    const updoot = await Updoot.findOne({ where: { postId, userId } });
+
+    if (updoot && updoot.value === realValue) {
+      throw new Error('Ya votaste en este post');
+    }
+
+    //si el usuario ya voto en el post antes y lo va a cambiar
+    if (updoot && updoot.value !== realValue) {
+      await getConnection().transaction(async (tm) => {
+        await tm.query(
+          `
+    update vote
+    set value = $1
+    where "postId" = $2 and "userId" = $3
+        `,
+          [realValue, postId, userId]
+        );
+
+        await tm.query(
+          `
+          update post
+          set votes = votes + $1
+          where id = $2
+        `,
+          [1 * realValue, postId]
+        );
+      });
+      //si el usuario no ha votado en ese post
+    } else if (!updoot) {
+      await getConnection().transaction(async (tm) => {
+        await tm.query(
+          `
+    insert into vote ("userId", "postId", value)
+    values ($1, $2, $3)
+        `,
+          [userId, postId, realValue]
+        );
+
+        await tm.query(
+          `
+    update post
+    set votes = votes + $1
+    where id = $2
+      `,
+          [realValue, postId]
+        );
+      });
+    }
+
+    return (await PostEntity.findOne({ where: { id: postId } })) as PostEntity;
   }
 
   @Query(() => FetchPostsResponse, { nullable: true })
@@ -41,11 +141,13 @@ export class Post {
       [posts, totalCount] = await entityManager.findAndCount(PostEntity, {
         where: { createdAt: LessThan(new Date(cursorID as string)) },
         order: { createdAt: 'DESC' },
+        relations: ['creator'],
         take: realLimitPlusOne,
       });
     } else {
       [posts, totalCount] = await entityManager.findAndCount(PostEntity, {
         order: { createdAt: 'DESC' },
+        relations: ['creator'],
         take: realLimitPlusOne,
       });
     }
@@ -69,7 +171,7 @@ export class Post {
     const userId = (req as any).userId;
     const post_id = Number(postId);
 
-    const post = await PostEntity.findOne({ id: post_id, user_id: userId });
+    const post = await PostEntity.findOne({ id: post_id, creator_id: userId });
 
     if (!post) {
       throw new Error('Post no existe');
@@ -105,7 +207,7 @@ export class Post {
     const userId = (req as any).userId;
 
     const post = await PostEntity.create({
-      user_id: userId,
+      creator_id: userId,
       title: input.title,
       body: input.body,
     }).save();

@@ -58,7 +58,7 @@ export const Navbar: FunctionComponent<NavProps> = ({ user }): JSX.Element => {
           }
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       console.log(error.message);
     }
   };

@@ -73,7 +73,7 @@ export const Login: FunctionComponent<loginProps> = ({
                 // if (data?.login && !loginError) {
                 //   onClose();
                 // }
-              } catch (error) {
+              } catch (error: any) {
                 setError(error.message);
               }
             }}

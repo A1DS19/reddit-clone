@@ -8,22 +8,12 @@ interface PostListProps {}
 
 export const PostList: React.FC<PostListProps> = ({}) => {
   const REQUEST_LIMIT = 2;
-  const [cursor, setCursor] = useState(null);
   const { data, loading, error, fetchMore, variables } = useFetchPostsQuery({
     variables: {
       limit: REQUEST_LIMIT,
-      cursor: cursor,
+      cursor: null,
     },
   });
-
-  // useEffect(() => {
-  //   fetchMore({
-  //     variables: {
-  //       limit: variables?.limit,
-  //       cursor: cursor,
-  //     },
-  //   });
-  // }, [cursor]);
 
   if (error) {
     return <div>Error: {error}</div>;
